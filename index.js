@@ -1,28 +1,13 @@
 const program = require('commander');
-const request = require('request-promise');
-const cheerio = require('cheerio');
 
 program
   .version('0.1.0')
-  .usage('[options] <domain ...>')
+  .usage('[options] <domains ...>')
   .parse(process.argv);
 
-const domains = program.args;
+const bootstrapLinks = program.args.slice();
 
-function crawlChunk(links) {
-  const requests = [];
+const Spider = require('./spider');
 
-  for (const link of links) {
-    requests.push(request(link).then(document => {
-      const query = cheerio.load(document);
-
-      const foundLinks = query('a[href]')
-        .toArray()
-        .map(element => query(element).attr('href'));
-
-      console.log(foundLinks);
-    }));
-  }
-}
-
-crawlChunk(domains);
+const spider = new Spider();
+spider.run();
