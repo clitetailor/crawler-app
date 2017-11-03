@@ -4,7 +4,6 @@ const program = require('commander');
 const chalk = require('chalk');
 const path = require('path');
 const fs = require('fs');
-const request = require('request-promise');
 
 program.version('0.1.0')
   .usage('[options] <domains>', 'Crawl a list of domains')
@@ -52,7 +51,7 @@ class Natio extends Spider {
 
   sendRequest(link) {
     if (!fs.existsSync(filenamify(link))) {
-      return request(link);
+      return super.sendRequest(link);
     }
     return Promise.reject(chalk.bgYellow('WARNING: '), `Link ${link} has been crawled!`);
   }
