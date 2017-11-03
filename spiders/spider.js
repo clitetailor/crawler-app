@@ -8,6 +8,8 @@ class Spider {
     this.queue = [];
     this.maxQueueSize = 1000;
     this.waitingTime = 1000;
+    this.stop = false;
+    this.counter = 0;
   }
 
   run() {
@@ -23,18 +25,25 @@ class Spider {
     }
 
     // Crawl links concurrently in order to avoid non-thread safe.
-    const crawlChunk = chunk.reduce((promise, nextLinkToCrawl) => {
-      // Wait for previous link to be crawled.
-      return promise.then(() => {
-        return request(nextLinkToCrawl).then((document) => {
+    const crawlChunk = chunk.reduce((promise, nextLinkToCrawl) => 
+      promise.then(() =>
+        request(nextLinkToCrawl).then((document) => {
+          if (this.stop === true) {
+            return false;
+          }
+  
           const $ = cheerio.load(document);
+          
+          this.render($, document, nextLinkToCrawl);
+          this.renderHyperLinks($, document, nextLinkToCrawl);
+          this.counter++;
 
-          this.render($, document);
-          this.renderHyperLinks($, document);
-        });
-      });
-    }, Promise.resolve());
+        }).catch(err => {
+          this.handleError(err);
+        })
+      ), Promise.resolve(true));
 
+    // Dispatch schedule.
     crawlChunk.then(() => {
       setTimeout(() => {
         this.run();
@@ -61,6 +70,10 @@ class Spider {
   addToQueue(newLinks) {
     // Bread first search strategy.
     this.queue = this.queue.concat(newLinks);
+  }
+
+  handleError(err) {
+    console.log(err);
   }
 }
 
