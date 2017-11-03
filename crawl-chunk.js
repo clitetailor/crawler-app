@@ -1,8 +1,9 @@
+
 function crawlChunk(links, addLinks) {
   return links.reduce((prev, next) => prev.then(prevLinks => {
     addLinks(prevLinks);
     return crawlLink(next);
-  }));
+  }), Promise.resolve());
 }
 
 function crawlLink(link) {

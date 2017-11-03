@@ -9,5 +9,5 @@ const bootstrapLinks = program.args.slice();
 
 const Spider = require('./spider');
 
-const spider = new Spider();
+const spider = new Spider(bootstrapLinks);
 spider.run();

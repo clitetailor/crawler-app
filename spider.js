@@ -13,12 +13,13 @@ class Spider {
 
   run() {
     crawlChunk(this.queue, links => this.addLinks(links))
-      .then(() => this.onDone());
+      .then(() => this.onDone())
+      .catch(err => console.log(err));
   }
 
   addLinks(links) {
     // Keep queue size <= 1000.
-    const unfilled = this.queueSize - queue.length;
+    const unfilled = this.queueSize - this.queue.length;
     const numberOfNextLinks = links.length < unfilled ? links.length : unfilled; // Prevent undefined items.
 
     const nextLinks = links.slice(0, numberOfNextLinks);
