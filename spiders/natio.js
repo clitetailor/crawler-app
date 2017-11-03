@@ -30,7 +30,7 @@ class Natio extends Spider {
     if (!fs.existsSync(this.directory)) {
       fs.mkdir(this.directory, (err) => {
         if (err) {
-          console.log(chalk.white.bgRed('ERROR: '), err);
+          console.log(chalk.bgRed('ERROR'), err);
           this.stop = true;
 
           return;
@@ -42,22 +42,24 @@ class Natio extends Spider {
       });
       this.stop = true;
     }
-    console.log(chalk.white.bgGreen('STARTUP'));
+    console.log(chalk.bgGreen('STARTUP'));
   }
 
   beforeSendingRequest(link) {
-    console.log(chalk.white.bgYellow('SENDING REQUEST:'), link);
+    console.log(chalk.bgYellow('SENDING REQUEST'), link);
   }
 
   sendRequest(link) {
-    if (!fs.existsSync(filenamify(link))) {
+    console.log(fs.existsSync(path.resolve(this.directory, filenamify(link))));
+    if (!fs.existsSync(path.resolve(this.directory, filenamify(link)))) {
+      console.log(true);
       return super.sendRequest(link);
     }
-    return Promise.reject(chalk.bgYellow('WARNING: '), `Link ${link} has been crawled!`);
+    return Promise.reject(chalk.bgYellow('WARNING'), `Link ${link} has been crawled!`);
   }
 
   render($, document, link) {
-    console.log(chalk.white.bgGreen('RENDERING:'), link);
+    console.log(chalk.bgGreen('RENDERING'), link);
 
     // Maximum 5000 link.
     if (this.counter >= this.maxCounter) {
@@ -67,15 +69,19 @@ class Natio extends Spider {
     const encodedLink = filenamify(link);
 
     const filename = path.resolve(this.directory, encodedLink);
-    fs.writeFile(filename, document);
+    fs.writeFile(filename, document, (err) => {
+      if (err) {
+        console.log(chalk.bgRed('ERROR'), err);
+      }
+    });
   }
 
   crawlerOnFinish() {
-    console.log(chalk.white.bgBlue('FINISH'));
+    console.log(chalk.bgBlue('FINISH'));
   }
 
   handleError(err) {
-    console.log(chalk.white.bgRed('FAILED:'), err);
+    console.log(chalk.bgRed('FAILED'), err);
   }
 }
 

@@ -38,6 +38,7 @@ class Spider {
   beforeSendingRequest() { }
 
   sendRequest(link) {
+    this.beforeSendingRequest(link);
     return request(link);
   }
 
@@ -62,8 +63,6 @@ class Spider {
      */
     const crawlChunk = chunk.reduce((promise, nextLinkToCrawl) =>
       promise.then(() => {
-        this.beforeSendingRequest(nextLinkToCrawl);
-
         return this.sendRequest(nextLinkToCrawl).then((document) => {
           if (this.stop === true) {
             return false;
@@ -109,13 +108,14 @@ class Spider {
     newLinks = newLinks
       .map(link => new URL(link, currentLink))
       .filter(link => {
-        link.hash = undefined;
+        link.hash = '';
         
         if (link.href === currentLink.href) {
           return false;
         }
         return true;
-      });
+      })
+      .map(link => link.href);
 
     return this.addToQueue(newLinks);
   }
