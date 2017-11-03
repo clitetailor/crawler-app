@@ -34,6 +34,8 @@ class Spider {
 
   crawlerOnFinish() { }
 
+  beforeSendingRequest() { }
+
   crawl() {
     // Take a chunk of links to crawl.
     const chunk = this.queue.splice(0, this.chunkSize < this.queue.length ? this.chunkSize : this.queue);
@@ -46,8 +48,10 @@ class Spider {
 
     // Crawl links concurrently in order to avoid non-thread safe.
     const crawlChunk = chunk.reduce((promise, nextLinkToCrawl) =>
-      promise.then(() =>
-        request(nextLinkToCrawl).then((document) => {
+      promise.then(() => {
+        this.beforeSendingRequest(nextLinkToCrawl);
+        
+        return request(nextLinkToCrawl).then((document) => {
           if (this.stop === true) {
             return false;
           }
@@ -60,8 +64,8 @@ class Spider {
 
         }).catch(err => {
           this.handleError(err);
-        })
-      ), Promise.resolve(true));
+        });
+      }), Promise.resolve(true));
 
     // Dispatch schedule.
     crawlChunk.then(() => {
@@ -71,9 +75,7 @@ class Spider {
     });
   }
 
-  render() {
-
-  }
+  render() { }
 
   renderHyperLinks($, document, currentLink) {
     let newLinks = $('a[href]').toArray();
