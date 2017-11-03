@@ -4,15 +4,17 @@ const program = require('commander');
 const chalk = require('chalk');
 const path = require('path');
 const fs = require('fs');
+const request = require('request-promise');
 
 program.version('0.1.0')
-  .usage('[options] <domains>', 'Crawl a list of domains')  
+  .usage('[options] <domains>', 'Crawl a list of domains')
   .option('-o --output', 'Specify the output directory')
   .option('-w --wait', 'The duration of waiting time between each chunks')
   .option('-n --number', 'The number of pages will be crawl')
   .option('-q --queue-size', 'The queue size')
-  .option('-c --chunk', 'The chunk size')
-  .option('--cache', 'The name of the cache file');
+  .option('-c --chunk', 'The chunk size');
+
+program.parse(process.argv);
 
 class Natio extends Spider {
   constructor() {
@@ -29,7 +31,7 @@ class Natio extends Spider {
     if (!fs.existsSync(this.directory)) {
       fs.mkdir(this.directory, (err) => {
         if (err) {
-          console.log(chalk.bgRed('ERROR: '), err);
+          console.log(chalk.white.bgRed('ERROR: '), err);
           this.stop = true;
 
           return;
@@ -41,14 +43,22 @@ class Natio extends Spider {
       });
       this.stop = true;
     }
+    console.log(chalk.white.bgGreen('STARTUP'));
   }
 
   beforeSendingRequest(link) {
-    console.log(chalk.bgYellow('SENDING REQUEST: ') + link);
+    console.log(chalk.white.bgYellow('SENDING REQUEST:'), link);
+  }
+
+  sendRequest(link) {
+    if (!fs.existsSync(filenamify(link))) {
+      return request(link);
+    }
+    return Promise.reject(chalk.bgYellow('WARNING: '), `Link ${link} has been crawled!`);
   }
 
   render($, document, link) {
-    console.log(chalk.bgGreen('RENDERING: '), link);
+    console.log(chalk.white.bgGreen('RENDERING:'), link);
 
     // Maximum 5000 link.
     if (this.counter >= this.maxCounter) {
@@ -61,8 +71,12 @@ class Natio extends Spider {
     fs.writeFile(filename, document);
   }
 
+  crawlerOnFinish() {
+    console.log(chalk.white.bgBlue('FINISH'));
+  }
+
   handleError(err) {
-    console.log(chalk.bgRed('FAILED: '), err);
+    console.log(chalk.white.bgRed('FAILED:'), err);
   }
 }
 

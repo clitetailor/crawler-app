@@ -1,5 +1,6 @@
 function bootstrap (app) {
-  app.forEach(Component => {
+  Object.keys(app).forEach(componentName => {
+    const Component = app[componentName];
     const crawlInstance = new Component();
     crawlInstance.run();
   });

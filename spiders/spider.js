@@ -28,6 +28,7 @@ class Spider {
       });
     
     this.crawlerOnInit();
+    this.crawl();
   }
 
   crawlerOnInit() { }
@@ -36,22 +37,34 @@ class Spider {
 
   beforeSendingRequest() { }
 
-  crawl() {
-    // Take a chunk of links to crawl.
-    const chunk = this.queue.splice(0, this.chunkSize < this.queue.length ? this.chunkSize : this.queue);
+  sendRequest(link) {
+    return request(link);
+  }
 
-    // No more links to crawl, we finish the work here!
+  crawl() {
+    /**
+     * Take a chunk of links to crawl.
+     */
+    const chunk = this.queue.splice(0, this.chunkSize < this.queue.length ? this.chunkSize : this.queue.length);
+
+
+    /**
+     * No more links to crawl, we finish the work here!
+     */
     if (chunk.length === 0 || this.stop === true) {
       this.crawlerOnFinish();
       return;
     }
 
-    // Crawl links concurrently in order to avoid non-thread safe.
+
+    /**
+     * Crawl links concurrently in order to avoid non-thread safe.
+     */
     const crawlChunk = chunk.reduce((promise, nextLinkToCrawl) =>
       promise.then(() => {
         this.beforeSendingRequest(nextLinkToCrawl);
-        
-        return request(nextLinkToCrawl).then((document) => {
+
+        return this.sendRequest(nextLinkToCrawl).then((document) => {
           if (this.stop === true) {
             return false;
           }
@@ -62,33 +75,49 @@ class Spider {
           this.renderHyperLinks($, document, nextLinkToCrawl);
           this.counter++;
 
-        }).catch(err => {
-          this.handleError(err);
-        });
-      }), Promise.resolve(true));
+        }).catch(err => this.handleError(err));
+      })
+        .catch(err => this.handleError(err)),
+    Promise.resolve(true));
 
-    // Dispatch schedule.
+
+    /** Dispatch schedule. */
+
     crawlChunk.then(() => {
       setTimeout(() => {
         this.crawl();
       }, this.waitingTime);
-    });
+    })
+      .catch(err =>
+        this.handleError(err));
   }
 
   render() { }
 
   renderHyperLinks($, document, currentLink) {
-    let newLinks = $('a[href]').toArray();
+    let newLinks = $('a[href]')
+      .toArray()
+      .map(element => $(element).attr('href'));
+
     const unfilled = this.maxQueueSize - this.queue.length;
 
-    // Limit max queue size.
-    if (newLinks.length > this.queue.length) {
-      newLinks = this.newLinks.slice(0, unfilled);
+    /** Cut-down links to limit the queue size. */
+    if (newLinks.length > unfilled) {
+      newLinks = newLinks.slice(0, unfilled);
     }
 
-    newLinks = newLinks.map(link => new URL(link, currentLink).href);
+    newLinks = newLinks
+      .map(link => new URL(link, currentLink))
+      .filter(link => {
+        link.hash = undefined;
+        
+        if (link.href === currentLink.href) {
+          return false;
+        }
+        return true;
+      });
 
-    this.addToQueue(newLinks);
+    return this.addToQueue(newLinks);
   }
 
   addToQueue(newLinks) {
