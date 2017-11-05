@@ -1,9 +1,10 @@
 const Spider = require('./spider');
+const DocumentExtractor = require('./document-extractor');
 const filenamify = require('filenamify');
 const program = require('commander');
 const chalk = require('chalk');
 const path = require('path');
-const fs = require('fs');
+const fs = require('fs-extra');
 
 program.version('0.1.0')
   .usage('[options] <domains>', 'Crawl a list of domains')
@@ -27,61 +28,85 @@ class Natio extends Spider {
   }
 
   crawlerOnInit() {
-    if (!fs.existsSync(this.directory)) {
-      fs.mkdir(this.directory, (err) => {
-        if (err) {
-          console.log(chalk.bgRed('ERROR'), err);
-          this.stop = true;
-
-          return;
-        }
-
-        if (!fs.existsSync(this.directory)) {
-          this.stop = true;
-        }
-      });
-      this.stop = true;
-    }
-    console.log(chalk.bgGreen('STARTUP'));
+    fs.ensureDir(this.directory);
   }
 
   beforeSendingRequest(link) {
-    console.log(chalk.bgYellow('SENDING REQUEST'), link);
+    console.log(
+      chalk.default.bgYellow.dim.bold(' SENDING REQUEST '),
+      link
+    );
   }
 
   sendRequest(link) {
-    console.log(fs.existsSync(path.resolve(this.directory, filenamify(link))));
-    if (!fs.existsSync(path.resolve(this.directory, filenamify(link)))) {
-      console.log(true);
-      return super.sendRequest(link);
-    }
-    return Promise.reject(chalk.bgYellow('WARNING'), `Link ${link} has been crawled!`);
+    const filename = this.resolveLink(link);
+
+    return fs.pathExists(filename)
+      .then(isTrue => isTrue
+        ? Promise.resolve()
+        : super.sendRequest(link))
+      .catch(err => this.handleError(err));
   }
 
-  render($, document, link) {
-    console.log(chalk.bgGreen('RENDERING'), link);
+  resolveLink(link) {
+    const encoded = link.split(/\/\//)
+      .slice(1)
+      .map(part => filenamify(part))
+      .join('/');
+    
+    return path.resolve(
+      this.directory,
+      `${encoded}.json`
+    );
+  }
 
-    // Maximum 5000 link.
+  render($, page, link) {
+    console.log(
+      chalk.default.bgGreen.dim.bold(' RENDERING '),
+      link
+    );
+
+    const document = DocumentExtractor.extractDocument($);
+    
+    /**
+     * Maximum 5000 link.
+     * */
+
     if (this.counter >= this.maxCounter) {
       this.stop = true;
     }
 
-    const encodedLink = filenamify(link);
+    /**
+     * Encode filename so that it's suitable for filesystem.
+     * */
 
-    const filename = path.resolve(this.directory, encodedLink);
-    fs.writeFile(filename, document, (err) => {
-      if (err) {
-        console.log(chalk.bgRed('ERROR'), err);
-      }
-    });
+    const filename = this.resolveLink(link);
+
+    fs.outputJSON(
+      filename,
+      document,
+      {
+        spaces: 2
+      },
+      (err) => this.handleError(err)
+    );
   }
 
   crawlerOnFinish() {
-    console.log(chalk.bgBlue('FINISH'));
+    console.log(
+      chalk.default.bgCyan.dim.bold(' FINISHED! ')
+    );
   }
 
   handleError(err) {
-    console.log(chalk.bgRed('FAILED'), err);
+    if (err) {
+      console.log(
+        chalk.default.bgRed.dim.bold(' ERROR '),
+        err
+      );
+    }
+
+    return this.dispatchNext();
   }
 }
 

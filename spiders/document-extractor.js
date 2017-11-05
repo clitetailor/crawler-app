@@ -5,7 +5,7 @@ class Document {
   }
 }
 
-class StructureExtractor {
+class DocumentExtractor {
   static extractDocument($) {
     return new Document(
       this.extractTitle($),
@@ -29,4 +29,4 @@ class StructureExtractor {
   }
 }
 
-module.exports = StructureExtractor;
+module.exports = DocumentExtractor;

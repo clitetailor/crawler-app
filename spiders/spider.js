@@ -1,6 +1,6 @@
 const cheerio = require('cheerio');
 const request = require('request-promise');
-const { URL } = require('url');
+const URLResolver = require('./url-resolver');
 
 class Spider {
   constructor() {
@@ -17,15 +17,7 @@ class Spider {
     // Clone the bootstrap links to prevent side effects.
     this.queue = this.bootstrapLinks
       .slice()
-      .map(link => {
-        if (
-          link && link.match && link.match(/^http/i)
-        ) {
-          return link;
-        } else {
-          return 'https://' + link;
-        }
-      });
+      .map(link => URLResolver.resolveURL(link));
     
     this.crawlerOnInit();
     this.crawl();
@@ -46,49 +38,71 @@ class Spider {
     /**
      * Take a chunk of links to crawl.
      */
-    const chunk = this.queue.splice(0, this.chunkSize < this.queue.length ? this.chunkSize : this.queue.length);
 
+    const chunk = this.getChunk();
 
     /**
      * No more links to crawl, we finish the work here!
      */
+    
     if (chunk.length === 0 || this.stop === true) {
       this.crawlerOnFinish();
       return;
     }
 
-
     /**
      * Crawl links concurrently in order to avoid non-thread safe.
      */
-    const crawlChunk = chunk.reduce((promise, nextLinkToCrawl) =>
-      promise.then(() => {
-        return this.sendRequest(nextLinkToCrawl).then((document) => {
-          if (this.stop === true) {
-            return false;
-          }
+    
+    this.crawlChunk(
+      chunk,
+      (document, link) => this.handleRequest(document, link),
+      (err) => this.handleError(err),
+      () => this.dispatchNext()
+    );
+  }
 
-          const $ = cheerio.load(document);
+  dispatchNext() {
+    setTimeout(
+      () => this.crawl(),
+      this.waitingTime
+    );
+  }
 
-          this.render($, document, nextLinkToCrawl);
-          this.renderHyperLinks($, document, nextLinkToCrawl);
-          this.counter++;
+  getChunk() {
+    return this.queue.splice(
+      0,
+      this.chunkSize < this.queue.length
+        ? this.chunkSize
+        : this.queue.length
+    );
+  }
 
-        }).catch(err => this.handleError(err));
-      })
-        .catch(err => this.handleError(err)),
-    Promise.resolve(true));
+  crawlChunk(chunk, handleRequest, handleError, done) {
+    const requests = chunk.map(
+      link =>
+        this.sendRequest(link)
+          .then(page => handleRequest(page, link))
+          .catch(err => handleError(err))
+    );
+    
+    return Promise.all(requests)
+      .then(done)
+      .catch(err => handleError(err));
+  }
 
+  handleRequest(page, link) {
+    if (page) {
+      const $ = cheerio.load(page);
 
-    /** Dispatch schedule. */
+      this.render($, page, link);
+      this.renderHyperLinks($, page, link);
+    }
+  }
 
-    crawlChunk.then(() => {
-      setTimeout(() => {
-        this.crawl();
-      }, this.waitingTime);
-    })
-      .catch(err =>
-        this.handleError(err));
+  addToQueue(links) {
+    // Bread first search strategy.
+    this.queue = this.queue.concat(links);
   }
 
   render() { }
@@ -100,29 +114,17 @@ class Spider {
 
     const unfilled = this.maxQueueSize - this.queue.length;
 
-    /** Cut-down links to limit the queue size. */
+    /**
+     * Cut-down links to limit the queue size.
+     * */
+
     if (newLinks.length > unfilled) {
       newLinks = newLinks.slice(0, unfilled);
     }
 
-    newLinks = newLinks
-      .map(link => new URL(link, currentLink))
-      .filter(link => {
-        link.hash = '';
-        
-        if (link.href === currentLink.href) {
-          return false;
-        }
-        return true;
-      })
-      .map(link => link.href);
+    newLinks = URLResolver.resolveURLs(currentLink, newLinks);
 
     return this.addToQueue(newLinks);
-  }
-
-  addToQueue(newLinks) {
-    // Bread first search strategy.
-    this.queue = this.queue.concat(newLinks);
   }
 
   handleError() { }
