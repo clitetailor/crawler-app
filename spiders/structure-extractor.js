@@ -1,31 +1,31 @@
-class StructureExtractor {
-  constructor() {
-
+class Document {
+  constructor(title, content) {
+    this.title = title;
+    this.content = content;
   }
+}
 
+class StructureExtractor {
   static extractDocument($) {
-
+    return new Document(
+      this.extractTitle($),
+      this.extractContent($)
+    );
   }
 
   static extractContent($) {
-    
+    return $('p').toArray()
+      .map(p => $(p).text())
+      .join('\n');
   }
 
   static extractTitle($) {
-    const pageTitle = $('title').text();
+    return $('h1').first().text();
+  }
 
-    const contentTitles = [
-      'h1',
-      'h2',
-      'h3',
-      'h4',
-      'h5',
-      'h6'
-    ]
-      .map(selector =>
-        $(selector).toArray())
-      .reduce((prev, next) =>
-        prev.concat(next), []);
+  static extractURLs($) {
+    return $('a[href]').toArray()
+      .map(anchor => $(anchor).attr('href'));
   }
 }
 
