@@ -46,7 +46,7 @@ class URLResolver {
       base = this.resolveURL(base);
 
       try {
-        return new URL(base, relative).href;
+        return new URL(relative, base).href;
       } catch (err) {
         return relative;
       }
