@@ -1,5 +1,6 @@
 const Spider = require('./spider');
 const DocumentExtractor = require('./document-extractor');
+const URLResolver = require('./url-resolver');
 const filenamify = require('filenamify');
 const program = require('commander');
 const chalk = require('chalk');
@@ -31,26 +32,32 @@ class Natio extends Spider {
     fs.ensureDir(this.directory);
   }
 
-  beforeSendingRequest(link) {
-    console.log(
-      chalk.default.bgYellow.dim.bold(' SENDING REQUEST '),
-      link
-    );
-  }
-
   sendRequest(link) {
     const filename = this.resolveLink(link);
 
+    const sendRequest = () => {
+      console.log(
+        chalk.default.bgYellow.dim.bold(' SENDING REQUEST '),
+        link
+      );
+
+      return super.sendRequest(link);
+    };
+
     return fs.pathExists(filename)
-      .then(isTrue => isTrue
-        ? Promise.resolve()
-        : super.sendRequest(link))
+      .then(isTrue => {
+        if (isTrue) {
+          return Promise.resolve();
+        } else {
+          return sendRequest(link);
+        }
+      })
       .catch(err => this.handleError(err));
   }
 
   resolveLink(link) {
-    const encoded = link.split(/\/\//)
-      .slice(1)
+    const encoded = link.split(/\//gi)
+      .slice(2)
       .map(part => filenamify(part))
       .join('/');
     
@@ -103,6 +110,14 @@ class Natio extends Spider {
         err
       );
     }
+  }
+
+  resolveURL(url) {
+    return URLResolver.resolveURL(url);
+  }
+
+  resolveURLs(base, relatives) {
+    return URLResolver.resolveURLs(base, relatives);
   }
 }
 

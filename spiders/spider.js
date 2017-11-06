@@ -1,6 +1,5 @@
 const cheerio = require('cheerio');
 const request = require('request-promise');
-const URLResolver = require('./url-resolver');
 
 class Spider {
   constructor() {
@@ -17,7 +16,7 @@ class Spider {
     // Clone the bootstrap links to prevent side effects.
     this.queue = this.bootstrapLinks
       .slice()
-      .map(link => URLResolver.resolveURL(link));
+      .map(link => this.resolveURL(link));
     
     this.crawlerOnInit();
     this.crawl();
@@ -114,17 +113,28 @@ class Spider {
 
     const unfilled = this.maxQueueSize - this.queue.length;
 
+    this.crawlerOnRenderHrefs(newLinks, currentLink);
     /**
      * Cut-down links to limit the queue size.
      * */
 
     if (newLinks.length > unfilled) {
-      newLinks = newLinks.slice(0, unfilled);
+      newLinks = newLinks.slice(0, unfilled); 
     }
 
-    newLinks = URLResolver.resolveURLs(currentLink, newLinks);
+    newLinks = this.resolveURLs(currentLink, newLinks);
 
-    return this.addToQueue(newLinks);
+    this.addToQueue(newLinks);
+  }
+
+  crawlerOnRenderHrefs() { }
+
+  resolveURLs() {
+    return [];
+  }
+
+  resolveURL() {
+    return '';
   }
 
   handleError() { }
