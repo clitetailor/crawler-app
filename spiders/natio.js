@@ -61,7 +61,6 @@ class Natio extends Spider {
       .map(part => filenamify(part));
     
     if (parts[parts.length - 1] === '') {
-      console.log('ok!');
       parts.pop();
       parts.push('index');
     }
