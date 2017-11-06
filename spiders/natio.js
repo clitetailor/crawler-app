@@ -56,10 +56,17 @@ class Natio extends Spider {
   }
 
   resolveFileName(link) {
-    const encoded = link.split(/\//gi)
+    const parts = link.split(/\//gi)
       .slice(2)
-      .map(part => filenamify(part))
-      .join('/');
+      .map(part => filenamify(part));
+    
+    if (parts[parts.length - 1] === '') {
+      console.log('ok!');
+      parts.pop();
+      parts.push('index');
+    }
+
+    const encoded = parts.join('/');
     
     return path.resolve(
       this.directory,
