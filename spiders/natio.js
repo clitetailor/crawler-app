@@ -85,9 +85,7 @@ class Natio extends Spider {
     fs.outputJSON(
       filename,
       document,
-      {
-        spaces: 2
-      },
+      { },
       (err) => this.handleError(err)
     );
   }
@@ -105,8 +103,6 @@ class Natio extends Spider {
         err
       );
     }
-
-    return this.dispatchNext();
   }
 }
 

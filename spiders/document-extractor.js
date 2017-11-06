@@ -16,11 +16,16 @@ class DocumentExtractor {
   static extractContent($) {
     return $('p').toArray()
       .map(p => $(p).text())
+      .map(p => p.split(/\s+/gi).join(' '))      
       .join('\n');
   }
 
   static extractTitle($) {
-    return $('h1').first().text();
+    return $('h1').first()
+      .text()
+      .split(/\s+/gi)
+      .join(' ')
+      .trim();
   }
 
   static extractURLs($) {

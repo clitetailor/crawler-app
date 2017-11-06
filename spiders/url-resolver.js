@@ -1,31 +1,33 @@
 const { URL } = require('url');
 
 class URLResolver {
-  static removeScriptHrefs(links) {
-    return links.filter(link => !link.match(/javascript:/gi));
+  static filterURLs(urls) {
+    return urls.filter(link => link.match(/^\/$/))
+      .filter(link => !link.match(/#/))
+      .filter(link => !link.match(/^\s+$/))
+      .filter(link => !link.match(/javascript:/gi));
   }
-
-  static removeHomeHrefs(links) {
-    return links.filter(link => link.match(/^\/$/));
-  }
-
-  static removeHashTagHrefs(links) {
-    return links.filter(link => !link.match(/#/));
-  }
-
-  static removeRedundantHrefs(links) {
-    return links.filter(link => !link.match(/\s+/));
+  
+  static resolveURLs(base, urls) {
+    if (!urls) {
+      return this.resolveURL(base);
+    } else {
+      return this.filterURLs(urls)
+        .map(url => this.resolveURL(base, url));
+    }
   }
 
   static resolveURL(base, relative) {
     if (!relative) {
-      
       /**
        * Resolve base url.
        * */
 
+      if (base.match(/\/\//)) {
+        return `https:${base}`; // The same protocol, add https.
+      }
       if (!base.match(/^http:\/\/|^https:\/\//)) {
-        return this.addHTTPS(base);
+        return `https://${base}`; // Missing protocol, add https.
       }
       return base;
     }
@@ -34,6 +36,9 @@ class URLResolver {
        * Resolve relative url.
        * */
 
+      if (base.match(/\/\//)) {
+        return `https:${base}`; // The same protocol, add https.
+      }
       if (relative.match(/^http:\/\/|^https:\/\//)) {
         return relative;
       }
@@ -43,28 +48,9 @@ class URLResolver {
       try {
         return new URL(base, relative).href;
       } catch (err) {
-        return base;
+        return relative;
       }
     }
-  }
-
-  static resolveURLs(base, relatives) {
-    if (!relatives) {
-      this.resolveURL(base);
-    } else {
-      return this.removeHashTagHrefs(
-        this.removeHomeHrefs(
-          this.removeRedundantHrefs(
-            this.removeScriptHrefs(relatives)
-          )
-        )
-      )
-        .map(link => this.resolveURL(base, link));
-    }
-  }
-
-  static addHTTPS(url) {
-    return 'https://' + url;
   }
 }
 
