@@ -1,37 +1,27 @@
 const { URL } = require('url');
 
 class URLResolver {
-  static filterURLs(urls) {
+  static filterHrefs(urls) {
     return urls.filter(link => !link.match(/^\/$/))
       .filter(link => !link.match(/#/))
       .filter(link => !link.match(/^\s+$/))
       .filter(link => !link.match(/javascript:/gi));
   }
   
-  static resolveURLs(base, urls) {
-    if (!urls) {
-      return this.resolveURL(base);
-    } else {
-      return this.filterURLs(urls)
-        .map(url => this.resolveURL(base, url));
-    }
-  }
-
-  static resolveURL(base, relative) {
-    if (!relative) {
+  static resolveURL(relative, base) {
+    if (!base) {
       /**
        * Resolve base url.
        * */
 
-      if (base.match(/^\/\//)) {
-        return `https:${base}`; // The same protocol, add https.
+      if (relative.match(/^\/\//)) {
+        return `https:${relative}`; // The same protocol, add https.
       }
-      if (!base.match(/^http:\/\/|^https:\/\//)) {
-        return `https://${base}`; // Missing protocol, add https.
+      if (!relative.match(/^http:\/\/|^https:\/\//)) {
+        return `https://${relative}`; // Missing protocol, add https.
       }
-      return base;
-    }
-    else {
+      return relative;
+    } else {
       /**
        * Resolve relative url.
        * */

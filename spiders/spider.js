@@ -57,11 +57,11 @@ class Spider {
       chunk,
       (document, link) => this.handleRequest(document, link),
       (err) => this.handleError(err),
-      () => this.dispatchNext()
+      () => this.dispatch()
     );
   }
 
-  dispatchNext() {
+  dispatch() {
     setTimeout(
       () => this.crawl(),
       this.waitingTime
@@ -122,19 +122,29 @@ class Spider {
       newLinks = newLinks.slice(0, unfilled); 
     }
 
-    newLinks = this.resolveURLs(currentLink, newLinks);
+    newLinks = this.filterHrefs(newLinks).map(
+      relativeLink =>
+        this.resolveURL(
+          currentLink,
+          relativeLink
+        )
+    );
 
     this.addToQueue(newLinks);
   }
 
   crawlerOnRenderHrefs() { }
 
-  resolveURLs() {
-    return [];
+  resolveURL(base, relative) {
+    if (relative) {
+      return relative;
+    } else {
+      return base;
+    }
   }
 
-  resolveURL() {
-    return '';
+  filterHrefs(urls) {
+    return urls;
   }
 
   handleError() { }

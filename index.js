@@ -1,4 +1,4 @@
 const bootstrap = require('./bootstrap');
-const Natio = require('./spiders/natio');
+const Lexa = require('./spiders/natio');
 
-bootstrap({ Natio });
+bootstrap({ Lexa });

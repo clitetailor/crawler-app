@@ -17,7 +17,7 @@ program.version('0.1.0')
 
 program.parse(process.argv);
 
-class Natio extends Spider {
+class Lexa extends Spider {
   constructor() {
     super();
     this.waitingTime = program.wait || 100;
@@ -32,35 +32,12 @@ class Natio extends Spider {
     fs.ensureDir(this.directory);
   }
 
-  sendRequest(link) {
-    const filename = this.resolveFileName(link);
-
-    const sendRequest = () => {
-      console.log(
-        chalk.default.bgYellow.dim.bold(' SENDING REQUEST '),
-        link
-      );
-
-      return super.sendRequest(link);
-    };
-
-    return fs.pathExists(filename)
-      .then(isTrue => {
-        if (isTrue) {
-          return Promise.resolve();
-        } else {
-          return sendRequest(link);
-        }
-      })
-      .catch(err => this.handleError(err));
-  }
-
   resolveFileName(link) {
     const encoded = link.split(/\//gi)
       .slice(2)
       .map(part => filenamify(part))
       .join('/');
-    
+
     return path.resolve(
       this.directory,
       `${encoded}.json`
@@ -74,7 +51,7 @@ class Natio extends Spider {
     );
 
     const document = DocumentExtractor.extractDocument($);
-    
+
     /**
      * Maximum 5000 link.
      * */
@@ -89,12 +66,20 @@ class Natio extends Spider {
 
     const filename = this.resolveFileName(link);
 
-    fs.outputJSON(
-      filename,
-      document,
-      { },
-      (err) => this.handleError(err)
-    );
+    fs.pathExists(filename)
+      .then(exists => {
+        if (exists) {
+          fs.outputJSON(
+            filename,
+            document,
+            {},
+            (err) => this.handleError(err)
+          );
+        } else {
+          return Promise.resolve();
+        }
+      })
+      .catch(err => this.handleError(err));
   }
 
   crawlerOnFinish() {
@@ -121,4 +106,4 @@ class Natio extends Spider {
   }
 }
 
-module.exports = Natio;
+module.exports = Lexa;
