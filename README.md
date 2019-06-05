@@ -1,25 +1,29 @@
-Lucene App Crawler
-==================
-
-This repo is a CLI crawler for my dream [Lucene App](https://github.com/clitetailor/lucene-search-app).
+Crawler App
+===========
 
 Prerequisite
 ------------
 
-> - Node (>= v8)
+- NodeJS (version >= 12)
+- Yarn
 
 Installation
 ------------
 
-To install run the following command from command prompt:
+To install the dependencies, run the following command:
 
 ```bash
-npm install
+$ yarn
 ```
 
-Usage
------
+To print the CLI usage, run the following command:
 
 ```bash
-node ./index.js --help
+$ yarn crawl --help
+```
+
+To start crawling, run:
+
+```bash
+$ yarn crawl urls
 ```

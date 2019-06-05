@@ -1,27 +1,27 @@
 {
-  "name": "lucene-crawler",
-  "version": "1.0.0",
+  "name": "crawler-app",
+  "version": "2.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
+    "crawl": "node crawler/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
-    "lucene"
+    "crawler"
   ],
   "author": "clitetailor",
   "license": "MIT",
   "dependencies": {
+    "axios": "^0.19.0",
     "chalk": "^2.3.0",
-    "chalk-cli": "^4.0.0",
     "cheerio": "^1.0.0-rc.2",
     "commander": "^2.11.0",
     "filenamify": "^2.0.0",
     "fs-extra": "^4.0.2",
-    "request": "^2.83.0",
-    "request-promise": "^4.2.2"
+    "js-yaml": "^3.13.1"
   },
   "devDependencies": {
-    "eslint": "^4.10.0"
+    "prettier": "^1.17.1"
   }
 }
