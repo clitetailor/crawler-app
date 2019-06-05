@@ -19,7 +19,7 @@
     "commander": "^2.11.0",
     "filenamify": "^2.0.0",
     "fs-extra": "^4.0.2",
-    "js-yaml": "^3.13.1"
+    "js-yaml": ">=3.13.1"
   },
   "devDependencies": {
     "prettier": "^1.17.1"
