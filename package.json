@@ -1,14 +1,17 @@
 {
-  "name": "crawler-app",
-  "version": "2.0.0",
+  "name": "crawler-cli",
+  "version": "1.1.0",
   "description": "",
-  "main": "index.js",
+  "main": "crawler/index.js",
   "scripts": {
-    "crawl": "node crawler/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "crawler": "node crawler/index.js"
+  },
+  "bin": {
+    "crawler": "crawler/index.js"
   },
   "keywords": [
-    "crawler"
+    "crawler",
+    "cli"
   ],
   "author": "clitetailor",
   "license": "MIT",

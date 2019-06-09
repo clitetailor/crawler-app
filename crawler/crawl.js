@@ -155,7 +155,9 @@ async function loadCache() {
       queue = data.queue
     }
   } catch (error) {
-    console.log(chalk`{yellow.inverse  ERROR } ${error.message}`)
+    console.log(
+      chalk`{yellow.inverse  ERROR } ${error.message}`
+    )
   }
 }
 
@@ -198,7 +200,9 @@ async function crawl(siteUrls, options = {}) {
 
         await saveCache()
       } catch (error) {
-        console.log(chalk`{red.inverse  ERROR } ${error.message}`)
+        console.log(
+          chalk`{red.inverse  ERROR } ${error.message}`
+        )
       } finally {
         process.exit()
       }

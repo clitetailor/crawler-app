@@ -1,29 +1,43 @@
-Crawler App
+Crawler CLI
 ===========
 
-Prerequisite
-------------
+Prerequisites
+-------------
 
 - NodeJS (version >= 12)
 - Yarn
 
-Installation
-------------
+Install
+-------
 
 To install the dependencies, run the following command:
 
 ```bash
-$ yarn
+yarn
 ```
 
-To print the CLI usage, run the following command:
+To install the app as global CLI run the following command:
 
 ```bash
-$ yarn crawl --help
+$ yarn global add $PWD
 ```
 
-To start crawling, run:
+Usage
+-----
+
+```console
+$ crawler --help
+
+Usage: crawler [options] [urls...]
+
+Options:
+  -V, --version          output the version number
+  -o, --output <output>  output directory
+  -h, --help             output usage information
+```
+
+Example:
 
 ```bash
-$ yarn crawl urls
+$ crawler --output _output https://example.com
 ```

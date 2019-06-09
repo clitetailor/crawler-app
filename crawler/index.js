@@ -1,19 +1,28 @@
+#!/usr/bin/env node
 const program = require('commander')
+const path = require('path')
+const fs = require('fs-extra')
 
 const { crawl } = require('./crawl')
 
 async function main() {
+  let version
+
   try {
-    const package = await fs.readFile(
-      path.resolve(__dirname, '../package.json')
+    const package = JSON.parse(
+      await fs.readFile(
+        path.resolve(__dirname, '../package.json')
+      )
     )
 
-    program.version(package.version)
+    version = package.version
   } catch (error) {
-    program.version('1.0.0')
+    version = '1.0.0'
   }
 
   program
+    .version(version)
+    .name('crawler')
     .arguments('[urls...]')
     .option('-o, --output <output>', 'output directory')
     .action(urls => {
