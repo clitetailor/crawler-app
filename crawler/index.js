@@ -15,7 +15,6 @@ async function main() {
 
   program
     .arguments('[urls...]')
-    .option('-d, --data <data>', 'data file')
     .option('-o, --output <output>', 'output directory')
     .action(urls => {
       crawl(urls, program)

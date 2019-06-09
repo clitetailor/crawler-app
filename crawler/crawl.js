@@ -13,15 +13,22 @@ const { configureSigInt } = require('./sigint')
 let siteSet = new Set()
 let queue = []
 
-let outputDir = 'output'
-let dataFile = 'crawler.yaml'
+let outputDir = path.resolve(process.cwd(), 'output')
+let siteDir
+let cacheFile
+setOutputDir(outputDir)
 
 let rateLimitCounter = 0
+
+function setOutputDir(dir) {
+  siteDir = path.resolve(dir, 'sites')
+  cacheFile = path.resolve(dir, 'cache.yaml')
+}
 
 async function downloadSite(siteUrl) {
   const payload = await axios({
     method: 'GET',
-    url: siteUrl,
+    url: encodeURI(siteUrl),
     headers: {
       'Content-Type': 'application/html'
     }
@@ -30,19 +37,14 @@ async function downloadSite(siteUrl) {
   return payload.data
 }
 
-async function storeSiteContent(siteUrl, content) {
+async function saveSiteContent(siteUrl, content) {
   const matchGroup = siteUrl.match(/^https?:\/\/(.+)/)
   const relativePath = matchGroup && matchGroup[1]
 
   if (relativePath) {
-    const currentWorkingDir = process.cwd()
-    const filenamifiedRelativePath = filenamify(relativePath)
+    const filenamified = filenamify(relativePath)
 
-    const storePath = path.resolve(
-      currentWorkingDir,
-      outputDir,
-      filenamifiedRelativePath
-    )
+    const storePath = path.resolve(siteDir, filenamified)
 
     await fs.ensureFile(storePath)
     await fs.writeFile(storePath, content)
@@ -88,12 +90,12 @@ function shiftUrl() {
   return queue.shift()
 }
 
-async function resolveUrl(siteUrl) {
-  console.log(chalk`{green.inverse GET} ${siteUrl}`)
+async function resolveSite(siteUrl) {
+  console.log(chalk`{green.inverse  GET } ${siteUrl}`)
 
   const data = await downloadSite(siteUrl)
 
-  await storeSiteContent(siteUrl, data)
+  await saveSiteContent(siteUrl, data)
 
   const $ = cheerio.load(data, {
     normalizeWhitespace: true,
@@ -116,7 +118,7 @@ async function checkRateLimit() {
   rateLimitCounter = rateLimitCounter + 1
 
   if (rateLimitCounter % 50 === 0) {
-    console.log(chalk`{yellow.inverse INFO}`)
+    console.log(chalk`{yellow.inverse  INFO }`)
     console.log(`  queue: ${queue.length}`)
     console.log(`  sites: ${siteSet.size}`)
 
@@ -125,32 +127,27 @@ async function checkRateLimit() {
   }
 }
 
-async function resolve() {
+async function resolveAll() {
   while (true) {
     const siteUrl = shiftUrl()
 
     try {
-      await resolveUrl(siteUrl)
+      await resolveSite(siteUrl)
       await checkRateLimit()
     } catch (error) {
-      console.log(chalk`{red.inverse ERROR} ${error.message}`)
+      console.log(chalk`{red.inverse  ERROR } ${error.message}`)
       await timeout(60 * 1000)
     }
   }
 }
 
-async function loadPreviousSession() {
+async function loadCache() {
   try {
-    const crawlerFilePath = path.resolve(
-      process.cwd(),
-      dataFile
-    )
-
-    if (!fs.exists()) {
+    if (!(await fs.exists(cacheFile))) {
       return
     }
 
-    const textData = await fs.readFile(crawlerFilePath)
+    const textData = await fs.readFile(cacheFile)
     const data = yaml.safeLoad(textData)
 
     if (data) {
@@ -158,8 +155,20 @@ async function loadPreviousSession() {
       queue = data.queue
     }
   } catch (error) {
-    console.log(chalk`{yellow.inverse ERROR} ${error.message}`)
+    console.log(chalk`{yellow.inverse  ERROR } ${error.message}`)
   }
+}
+
+async function saveCache() {
+  await fs.ensureFile(cacheFile)
+
+  return fs.writeFile(
+    cacheFile,
+    yaml.safeDump({
+      queue,
+      siteSet: Array.from(siteSet)
+    })
+  )
 }
 
 function addHttps(siteUrl) {
@@ -174,29 +183,28 @@ async function crawl(siteUrls, options = {}) {
   try {
     configureSigInt()
 
-    outputDir = options.output || outputDir
-    dataFile = options.data || dataFile
+    if (options.output) {
+      setOutputDir(options.output)
+    }
 
-    await loadPreviousSession()
+    await loadCache()
     addUrls(siteUrls.map(addHttps))
 
-    resolve()
+    resolveAll()
 
     process.on('SIGINT', async () => {
-      console.log(chalk`{magenta.inverse SIGINT}`)
+      try {
+        console.log(chalk`{magenta.inverse  SIGINT }`)
 
-      await fs.writeFile(
-        path.resolve(process.cwd(), dataFile),
-        yaml.safeDump({
-          queue,
-          siteSet: Array.from(siteSet)
-        })
-      )
-
-      process.exit()
+        await saveCache()
+      } catch (error) {
+        console.log(chalk`{red.inverse  ERROR } ${error.message}`)
+      } finally {
+        process.exit()
+      }
     })
   } catch (error) {
-    console.log(chalk`{red.inverse ERROR} ${error.message}`)
+    console.log(chalk`{red.inverse  ERROR } ${error.message}`)
   }
 }
 
