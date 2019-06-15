@@ -2,8 +2,9 @@
 const program = require('commander')
 const path = require('path')
 const fs = require('fs-extra')
+const chalk = require('chalk')
 
-const { crawl } = require('./crawl')
+const { Crawler } = require('./crawler')
 
 async function main() {
   let version
@@ -21,12 +22,19 @@ async function main() {
   }
 
   program
-    .version(version)
+    .version(version, '-v, --version')
     .name('crawler')
-    .arguments('[urls...]')
+    .command('crawl [urls...]')
     .option('-o, --output <output>', 'output directory')
-    .action(urls => {
-      crawl(urls, program)
+    .action(async urls => {
+      try {
+        const crawler = Crawler.init(program)
+        crawler.addUrls(urls)
+
+        await crawler.crawl()
+      } catch (error) {
+        console.log(chalk.red.inverse(' ERROR '), error)
+      }
     })
 
   program.parse(process.argv)

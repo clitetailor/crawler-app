@@ -28,16 +28,19 @@ Usage
 ```console
 $ crawler --help
 
-Usage: crawler [options] [urls...]
+Usage: crawler [options] [command]
 
 Options:
-  -V, --version          output the version number
-  -o, --output <output>  output directory
-  -h, --help             output usage information
+  -V, --version              output the version number
+  -h, --help                 output usage information
+
+Commands:
+  crawl [options] [urls...]
 ```
 
-Example:
+Example
+-------
 
 ```bash
-$ crawler --output _output https://example.com
+$ crawler crawl --output _output https://example.com
 ```
