@@ -21,9 +21,11 @@ async function main() {
     version = '1.0.0'
   }
 
-  program
-    .version(version, '-v, --version')
-    .name('crawler')
+  program.version(version, '-v, --version').name('crawler')
+
+  const commands = {}
+
+  commands.crawl = program
     .command('crawl [urls...]')
     .option('-o, --output <output>', 'output directory')
     .action(async urls => {
@@ -34,6 +36,18 @@ async function main() {
         await crawler.crawl()
       } catch (error) {
         console.log(chalk.red.inverse(' ERROR '), error)
+      }
+    })
+
+  commands.help = program
+    .command('help [command]')
+    .action(name => {
+      const command = commands[name]
+
+      if (command) {
+        command.help()
+      } else {
+        program.help()
       }
     })
 
