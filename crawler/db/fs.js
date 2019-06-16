@@ -99,14 +99,12 @@ class FileStore {
     }
   }
 
-  async info() {
-    const queue = this.queue.length
-    const sites = this.sites.size
+  async queueSize() {
+    return this.queue.length
+  }
 
-    return {
-      queue,
-      sites
-    }
+  async siteCount() {
+    return this.sites.size
   }
 }
 

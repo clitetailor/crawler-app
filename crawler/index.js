@@ -28,18 +28,19 @@ async function main() {
   commands.crawl = program
     .command('crawl [urls...]')
     .option('-o, --output <output>', 'output directory')
-    .action(async urls => {
+    .action(async (urls, options) => {
       try {
-        const crawler = Crawler.init(program)
-        crawler.addUrls(urls)
-
+        const crawler = Crawler.init(options)
+        
+        await crawler.load()
+        await crawler.addUrls(urls)
         await crawler.start()
       } catch (error) {
         console.log(chalk.red.inverse(' ERROR '), error)
       }
     })
 
-  commands.help = program
+  program
     .command('help [command]')
     .action(name => {
       const command = commands[name]

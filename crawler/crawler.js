@@ -30,12 +30,10 @@ class Crawler {
   async start(options) {
     try {
       configureSigInt()
-      await this.store.load()
-
       process.on('SIGINT', async () => {
         try {
           console.log(chalk.magenta.inverse(' SIGINT '))
-          await this.store.save()
+          await this.save()
         } catch (error) {
           console.log(chalk.red.inverse(' ERROR '), error.stack)
         } finally {
@@ -44,9 +42,19 @@ class Crawler {
       })
 
       await this.fetchAll(options)
+
+      process.exit()
     } catch (error) {
       console.log(chalk.red.inverse(' ERROR '), error.stack)
     }
+  }
+
+  async load() {
+    return this.store.load()
+  }
+
+  async save() {
+    return this.store.save()
   }
 
   async fetchAll(options = {}) {
@@ -119,9 +127,10 @@ class Crawler {
     if (this.rateLimitCounter % 50 === 0) {
       console.log(chalk.yellow.inverse(' INFO '))
 
-      const info = await this.store.info()
-      console.log(`  queue: ${info.queue}`)
-      console.log(`  sites: ${info.sites}`)
+      const queueSize = await this.store.queueSize()
+      const siteCount = await this.store.siteCount()
+      console.log(`  queue: ${queueSize}`)
+      console.log(`  sites: ${siteCount}`)
 
       await timeout(60 * 1000)
       this.rateLimitCounter = this.rateLimitCounter + 1
