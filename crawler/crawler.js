@@ -125,6 +125,8 @@ class Crawler {
     this.rateLimitCounter = this.rateLimitCounter + 1
 
     if (this.rateLimitCounter % 50 === 0) {
+      this.save()
+
       console.log(chalk.yellow.inverse(' INFO '))
 
       const queueSize = await this.store.queueSize()
