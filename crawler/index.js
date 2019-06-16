@@ -33,7 +33,7 @@ async function main() {
         const crawler = Crawler.init(program)
         crawler.addUrls(urls)
 
-        await crawler.crawl()
+        await crawler.start()
       } catch (error) {
         console.log(chalk.red.inverse(' ERROR '), error)
       }
