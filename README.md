@@ -31,11 +31,12 @@ $ crawler --help
 Usage: crawler [options] [command]
 
 Options:
-  -V, --version              output the version number
+  -v, --version              output the version number
   -h, --help                 output usage information
 
 Commands:
   crawl [options] [urls...]
+  help [command]
 ```
 
 Example
