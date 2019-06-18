@@ -1,14 +1,14 @@
-const cheerio = require('cheerio')
-const url = require('url')
-const chalk = require('chalk')
+import cheerio from 'cheerio'
+import url from 'url'
+import chalk from 'chalk'
 
-const { timeout } = require('./timer')
-const { configureSigInt } = require('./sigint')
-const { preprocessUrl, addHttps } = require('./url')
-const { downloadSite } = require('./download')
-const { SequelizeStore } = require('./db/sequelize')
+import { timeout } from './timer'
+import { configureSigInt } from './sigint'
+import { preprocessUrl, addHttps } from './url'
+import { downloadSite } from './download'
+import { SequelizeStore } from './db/sequelize'
 
-class Crawler {
+export class Crawler {
   constructor(options = {}) {
     this.store = options.store
     this.rateLimitCounter = options.rateLimitCounter || 0
@@ -139,16 +139,12 @@ class Crawler {
 
       const pending = await this.store.pendingSiteCount()
       const resolved = await this.store.resolvedSiteCount()
-      console.log(`  pending:   ${pending}`)
-      console.log(`  resolved:  ${resolved}`)
-      console.log(`  total:     ${pending + resolved}`)
+      console.log(`    Pending:  ${pending}`)
+      console.log(`    Resolved: ${resolved}`)
+      console.log(`    Total:    ${pending + resolved}`)
 
       await timeout(60 * 1000)
       this.rateLimitCounter = this.rateLimitCounter + 1
     }
   }
-}
-
-module.exports = {
-  Crawler
 }

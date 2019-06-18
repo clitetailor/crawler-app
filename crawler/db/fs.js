@@ -1,9 +1,9 @@
-const filenamify = require('filenamify')
-const fs = require('fs-extra')
-const path = require('path')
-const yaml = require('js-yaml')
+import filenamify from 'filenamify'
+import fs from 'fs-extra'
+import path from 'path'
+import yaml from 'js-yaml'
 
-class FileStore {
+export class FileStore {
   constructor(options = {}) {
     this.sites = options.sites || new Set()
     this.queue = options.queue || []
@@ -113,8 +113,4 @@ class FileStore {
 
     return pending + resolved
   }
-}
-
-module.exports = {
-  FileStore
 }

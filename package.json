@@ -4,11 +4,11 @@
   "description": "",
   "main": "crawler/index.js",
   "scripts": {
-    "crawler": "node crawler/index.js",
+    "crawler": "node  -r esm crawler/index.js",
     "prettier:all": "prettier --config .prettierrc.yaml --write crawler/**/*.js"
   },
   "bin": {
-    "crawler": "crawler/index.js"
+    "crawler": "node -r esm crawler/index.js"
   },
   "keywords": [
     "crawler",
@@ -21,6 +21,7 @@
     "chalk": "^2.3.0",
     "cheerio": "^1.0.0-rc.2",
     "commander": "^2.11.0",
+    "esm": "^3.2.25",
     "filenamify": "^2.0.0",
     "fs-extra": "^4.0.2",
     "js-yaml": ">=3.13.1",

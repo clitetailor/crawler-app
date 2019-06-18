@@ -1,5 +1,5 @@
-const Sequelize = require('sequelize')
-const {
+import Sequelize from 'sequelize'
+import {
   createSiteModel,
   hasSiteTable,
   createSiteTable,
@@ -10,9 +10,9 @@ const {
   pendingSiteCount,
   resolvedSiteCount,
   totalSiteCount
-} = require('./site')
+} from './site'
 
-class SequelizeStore {
+export class SequelizeStore {
   constructor(options = {}) {
     this.db = options.db
   }
@@ -102,8 +102,4 @@ class SequelizeStore {
   async totalSiteCount() {
     return totalSiteCount(this.db)
   }
-}
-
-module.exports = {
-  SequelizeStore
 }

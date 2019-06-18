@@ -1,6 +1,6 @@
-const Sequelize = require('sequelize')
+import Sequelize from 'sequelize'
 
-function createSiteModel({ sequelize }) {
+export function createSiteModel({ sequelize }) {
   class Site extends Sequelize.Model {}
   Site.init(
     {
@@ -35,7 +35,7 @@ function createSiteModel({ sequelize }) {
   return { Site }
 }
 
-async function hasSiteTable({ sequelize }) {
+export async function hasSiteTable({ sequelize }) {
   const result = await sequelize.query(`
     SELECT EXISTS (
       SELECT  1
@@ -47,7 +47,7 @@ async function hasSiteTable({ sequelize }) {
   return result[0][0].exists
 }
 
-function createSiteTable({ queryInterface }) {
+export function createSiteTable({ queryInterface }) {
   return queryInterface.createTable('site', {
     id: {
       primaryKey: true,
@@ -76,7 +76,7 @@ function createSiteTable({ queryInterface }) {
   })
 }
 
-async function hasSite(db, args) {
+export async function hasSite(db, args) {
   const { Site } = db
   const { url } = args
 
@@ -89,7 +89,7 @@ async function hasSite(db, args) {
   return !!site
 }
 
-async function createSite(db, args) {
+export async function createSite(db, args) {
   const { Site } = db
   const { url } = args
 
@@ -101,7 +101,7 @@ async function createSite(db, args) {
   })
 }
 
-async function shiftPendingSite(db) {
+export async function shiftPendingSite(db) {
   const { Site } = db
 
   const [site] = await Site.findAll({
@@ -135,7 +135,7 @@ async function shiftPendingSite(db) {
   }
 }
 
-async function updateSiteContent(db, args) {
+export async function updateSiteContent(db, args) {
   const { Site } = db
   const { url, content } = args
 
@@ -151,7 +151,7 @@ async function updateSiteContent(db, args) {
   )
 }
 
-async function pendingSiteCount(db) {
+export async function pendingSiteCount(db) {
   const { Site } = db
 
   return Site.count({
@@ -161,7 +161,7 @@ async function pendingSiteCount(db) {
   })
 }
 
-async function resolvedSiteCount(db) {
+export async function resolvedSiteCount(db) {
   const { Site } = db
 
   return Site.count({
@@ -171,21 +171,8 @@ async function resolvedSiteCount(db) {
   })
 }
 
-async function totalSiteCount(db) {
+export async function totalSiteCount(db) {
   const { Site } = db
 
   return Site.count()
-}
-
-module.exports = {
-  createSiteModel,
-  hasSiteTable,
-  createSiteTable,
-  hasSite,
-  createSite,
-  updateSiteContent,
-  shiftPendingSite,
-  pendingSiteCount,
-  resolvedSiteCount,
-  totalSiteCount
 }

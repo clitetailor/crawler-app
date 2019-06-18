@@ -1,6 +1,6 @@
-const url = require('url')
+import url from 'url'
 
-function preprocessUrl(siteUrl, options = {}) {
+export function preprocessUrl(siteUrl, options = {}) {
   const parsedUrl = url.parse(siteUrl)
 
   if (!options.search) {
@@ -18,15 +18,10 @@ function preprocessUrl(siteUrl, options = {}) {
   return url.format(parsedUrl)
 }
 
-function addHttps(siteUrl) {
+export function addHttps(siteUrl) {
   if (!siteUrl.match(/^https?:\/\//)) {
     return `https://${siteUrl}`
   }
 
   return siteUrl
-}
-
-module.exports = {
-  preprocessUrl,
-  addHttps
 }
