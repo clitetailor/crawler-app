@@ -83,7 +83,7 @@ class FileStore {
     return this.queue.shift()
   }
 
-  async storeSiteContent(siteUrl, content) {
+  async saveSiteContent(siteUrl, content) {
     const siteDir = this.siteDir
 
     const matchGroup = siteUrl.match(/^https?:\/\/(.+)/)
@@ -99,12 +99,19 @@ class FileStore {
     }
   }
 
-  async queueSize() {
+  async pendingSiteCount() {
     return this.queue.length
   }
 
-  async siteCount() {
+  async resolvedSiteCount() {
     return this.sites.size
+  }
+
+  async totalSiteCount() {
+    const pending = await this.pendingSiteCount()
+    const resolved = await this.resolvedSiteCount()
+
+    return pending + resolved
   }
 }
 

@@ -4,7 +4,8 @@
   "description": "",
   "main": "crawler/index.js",
   "scripts": {
-    "crawler": "node crawler/index.js"
+    "crawler": "node crawler/index.js",
+    "prettier:all": "prettier --config .prettierrc.yaml --write crawler/**/*.js"
   },
   "bin": {
     "crawler": "crawler/index.js"
@@ -22,7 +23,10 @@
     "commander": "^2.11.0",
     "filenamify": "^2.0.0",
     "fs-extra": "^4.0.2",
-    "js-yaml": ">=3.13.1"
+    "js-yaml": ">=3.13.1",
+    "pg": "^7.11.0",
+    "pg-hstore": "^2.3.3",
+    "sequelize": "^5.8.9"
   },
   "devDependencies": {
     "prettier": "^1.17.1"

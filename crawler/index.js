@@ -31,7 +31,7 @@ async function main() {
     .action(async (urls, options) => {
       try {
         const crawler = Crawler.init(options)
-        
+
         await crawler.load()
         await crawler.addUrls(urls)
         await crawler.start()
@@ -40,17 +40,15 @@ async function main() {
       }
     })
 
-  program
-    .command('help [command]')
-    .action(name => {
-      const command = commands[name]
+  program.command('help [command]').action(name => {
+    const command = commands[name]
 
-      if (command) {
-        command.help()
-      } else {
-        program.help()
-      }
-    })
+    if (command) {
+      command.help()
+    } else {
+      program.help()
+    }
+  })
 
   program.parse(process.argv)
 }
