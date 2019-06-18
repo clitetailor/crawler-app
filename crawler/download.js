@@ -1,6 +1,6 @@
-const axios = require('axios')
+import axios from 'axios'
 
-async function downloadSite(siteUrl) {
+export async function downloadSite(siteUrl) {
   const payload = await axios({
     method: 'GET',
     url: encodeURI(siteUrl),
@@ -10,8 +10,4 @@ async function downloadSite(siteUrl) {
   })
 
   return payload.data
-}
-
-module.exports = {
-  downloadSite
 }

@@ -1,14 +1,14 @@
-const cheerio = require('cheerio')
-const url = require('url')
-const chalk = require('chalk')
+import cheerio from 'cheerio'
+import url from 'url'
+import chalk from 'chalk'
 
-const { timeout } = require('./timer')
-const { configureSigInt } = require('./sigint')
-const { preprocessUrl, addHttps } = require('./url')
-const { downloadSite } = require('./download')
-const { FileStore } = require('./db/fs')
+import { timeout } from './timer'
+import { configureSigInt } from './sigint'
+import { preprocessUrl, addHttps } from './url'
+import { downloadSite } from './download'
+import { SequelizeStore } from './db/sequelize'
 
-class Crawler {
+export class Crawler {
   constructor(options = {}) {
     this.store = options.store
     this.rateLimitCounter = options.rateLimitCounter || 0
@@ -16,9 +16,17 @@ class Crawler {
 
   static init(options = {}) {
     const crawler = new Crawler()
-    const fileStore = FileStore.init(options)
 
-    crawler.setStore(fileStore)
+    const sequelizeStore = SequelizeStore.init({
+      dialect: 'postgres',
+      database: 'postgres',
+      username: 'postgres',
+      password: 'postgres',
+      host: '192.168.99.100',
+      port: 5432
+    })
+
+    crawler.setStore(sequelizeStore)
 
     return crawler
   }
@@ -84,7 +92,7 @@ class Crawler {
 
     const data = await downloadSite(siteUrl)
 
-    await this.store.storeSiteContent(siteUrl, data)
+    await this.store.saveSiteContent(siteUrl, data)
 
     const $ = cheerio.load(data, {
       normalizeWhitespace: true,
@@ -129,17 +137,14 @@ class Crawler {
 
       console.log(chalk.yellow.inverse(' INFO '))
 
-      const queueSize = await this.store.queueSize()
-      const siteCount = await this.store.siteCount()
-      console.log(`  queue: ${queueSize}`)
-      console.log(`  sites: ${siteCount}`)
+      const pending = await this.store.pendingSiteCount()
+      const resolved = await this.store.resolvedSiteCount()
+      console.log(`    Pending:  ${pending}`)
+      console.log(`    Resolved: ${resolved}`)
+      console.log(`    Total:    ${pending + resolved}`)
 
       await timeout(60 * 1000)
       this.rateLimitCounter = this.rateLimitCounter + 1
     }
   }
-}
-
-module.exports = {
-  Crawler
 }

@@ -1,18 +1,14 @@
-const readline = require('readline')
+import readline from 'readline'
 
-function configureSigInt() {
+export function configureSigInt() {
   if (process.platform === 'win32') {
-    const interface = readline.createInterface({
+    const rlInterface = readline.createInterface({
       input: process.stdin,
       output: process.stdout
     })
 
-    interface.on('SIGINT', function() {
+    rlInterface.on('SIGINT', function() {
       process.emit('SIGINT')
     })
   }
-}
-
-module.exports = {
-  configureSigInt
 }

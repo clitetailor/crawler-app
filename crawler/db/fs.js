@@ -1,9 +1,9 @@
-const filenamify = require('filenamify')
-const fs = require('fs-extra')
-const path = require('path')
-const yaml = require('js-yaml')
+import filenamify from 'filenamify'
+import fs from 'fs-extra'
+import path from 'path'
+import yaml from 'js-yaml'
 
-class FileStore {
+export class FileStore {
   constructor(options = {}) {
     this.sites = options.sites || new Set()
     this.queue = options.queue || []
@@ -83,7 +83,7 @@ class FileStore {
     return this.queue.shift()
   }
 
-  async storeSiteContent(siteUrl, content) {
+  async saveSiteContent(siteUrl, content) {
     const siteDir = this.siteDir
 
     const matchGroup = siteUrl.match(/^https?:\/\/(.+)/)
@@ -99,15 +99,18 @@ class FileStore {
     }
   }
 
-  async queueSize() {
+  async pendingSiteCount() {
     return this.queue.length
   }
 
-  async siteCount() {
+  async resolvedSiteCount() {
     return this.sites.size
   }
-}
 
-module.exports = {
-  FileStore
+  async totalSiteCount() {
+    const pending = await this.pendingSiteCount()
+    const resolved = await this.resolvedSiteCount()
+
+    return pending + resolved
+  }
 }

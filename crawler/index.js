@@ -1,22 +1,22 @@
 #!/usr/bin/env node
-const program = require('commander')
-const path = require('path')
-const fs = require('fs-extra')
-const chalk = require('chalk')
+import program from 'commander'
+import path from 'path'
+import fs from 'fs-extra'
+import chalk from 'chalk'
 
-const { Crawler } = require('./crawler')
+import { Crawler } from './crawler'
 
 async function main() {
   let version
 
   try {
-    const package = JSON.parse(
+    const pkg = JSON.parse(
       await fs.readFile(
         path.resolve(__dirname, '../package.json')
       )
     )
 
-    version = package.version
+    version = pkg.version
   } catch (error) {
     version = '1.0.0'
   }
@@ -31,7 +31,7 @@ async function main() {
     .action(async (urls, options) => {
       try {
         const crawler = Crawler.init(options)
-        
+
         await crawler.load()
         await crawler.addUrls(urls)
         await crawler.start()
@@ -40,17 +40,15 @@ async function main() {
       }
     })
 
-  program
-    .command('help [command]')
-    .action(name => {
-      const command = commands[name]
+  program.command('help [command]').action(name => {
+    const command = commands[name]
 
-      if (command) {
-        command.help()
-      } else {
-        program.help()
-      }
-    })
+    if (command) {
+      command.help()
+    } else {
+      program.help()
+    }
+  })
 
   program.parse(process.argv)
 }
