@@ -1,12 +1,11 @@
-#!/usr/bin/env node
 import program from 'commander'
 import path from 'path'
 import fs from 'fs-extra'
 import chalk from 'chalk'
 
-import { Crawler } from './crawler'
+import { Crawler } from '../crawler/crawler'
 
-async function main() {
+export async function main() {
   let version
 
   try {
@@ -52,5 +51,3 @@ async function main() {
 
   program.parse(process.argv)
 }
-
-main()

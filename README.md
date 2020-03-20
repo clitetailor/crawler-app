@@ -43,5 +43,8 @@ Example
 -------
 
 ```bash
-$ crawler crawl --output _output https://example.com
+$ crawler init
+$ crawler url add example.com
+$ crawler fetch 10
+$ crawler start
 ```

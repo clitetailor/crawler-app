@@ -1,14 +1,14 @@
 {
   "name": "crawler-cli",
   "version": "1.1.0",
-  "description": "",
-  "main": "crawler/index.js",
+  "description": "A Crawler CLI in Node JS",
+  "main": "src/cli/index.js",
   "scripts": {
-    "crawler": "node  -r esm crawler/index.js",
+    "crawler": "node  -r esm src/cli/index.js",
     "prettier:all": "prettier --config .prettierrc.yaml --write crawler/**/*.js"
   },
   "bin": {
-    "crawler": "node -r esm crawler/index.js"
+    "crawler": "node -r esm src/cli/index.js"
   },
   "keywords": [
     "crawler",
@@ -18,6 +18,7 @@
   "license": "MIT",
   "dependencies": {
     "axios": "^0.19.0",
+    "bcrypt": "^3.0.6",
     "chalk": "^2.3.0",
     "cheerio": "^1.0.0-rc.2",
     "commander": "^2.11.0",
@@ -27,7 +28,9 @@
     "js-yaml": ">=3.13.1",
     "pg": "^7.11.0",
     "pg-hstore": "^2.3.3",
-    "sequelize": "^5.8.9"
+    "prompts": "^2.1.0",
+    "sequelize": "^5.8.9",
+    "yup": "^0.27.0"
   },
   "devDependencies": {
     "prettier": "^1.17.1"

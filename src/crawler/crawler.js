@@ -2,11 +2,11 @@ import cheerio from 'cheerio'
 import url from 'url'
 import chalk from 'chalk'
 
-import { timeout } from './timer'
-import { configureSigInt } from './sigint'
+import { timeout } from '../timer'
+import { configureSigInt } from '../sigint'
 import { preprocessUrl, addHttps } from './url'
 import { downloadSite } from './download'
-import { SequelizeStore } from './db/sequelize'
+import { SequelizeStore } from './store/sequelize'
 
 export class Crawler {
   constructor(options = {}) {
